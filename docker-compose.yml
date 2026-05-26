@@ -1,0 +1,32 @@
+services:
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: alphazero-gomoku-mpi:py36
+    container_name: gomoku-train
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    environment:
+      DISPLAY: host.docker.internal:0.0
+      SDL_VIDEODRIVER: x11
+    command: python train.py
+
+  train-mpi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: alphazero-gomoku-mpi:py36
+    container_name: gomoku-train-mpi
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    environment:
+      OMPI_ALLOW_RUN_AS_ROOT: "1"
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: "1"
+      MPI_NP: "4"
+      DISPLAY: host.docker.internal:0.0
+      SDL_VIDEODRIVER: x11
+    command: >
+      sh -c "mpiexec --allow-run-as-root -np ${MPI_NP:-4} python -u train_mpi.py"
